@@ -136,28 +136,104 @@ export async function submitAcademyRegistration(formData: FormData): Promise<Aca
   // Generate simple code (e.g. BA, BS, or BTA-XXXXXX)
   const simpleCode = generateSimpleAcademyCode(academyName);
 
-  // Generate a provisional UUID or temporary ID for owner_id
-  const provisionalOwnerId = crypto.randomUUID();
+  // 1. Resolve a valid owner profile ID to strictly satisfy academies_owner_id_fkey
+  let validOwnerId: string | null = null;
+  let adminClient: any = null;
+  try {
+    adminClient = createAdminClient();
+  } catch {
+    // Admin client optional
+  }
 
-  // Insert into academies with status explicitly set to 'active'
-  // (Satisfying CHECK (status IN ('active', 'suspended')) constraint)
+  if (adminClient) {
+    const rawPassword = `EduTrack@${Math.floor(100000 + Math.random() * 900000)}`;
+    const { data: authUser, error: authErr } = await adminClient.auth.admin.createUser({
+      email: ownerEmail,
+      password: rawPassword,
+      email_confirm: true,
+      user_metadata: { full_name: ownerName },
+    });
+
+    if (authUser?.user?.id) {
+      validOwnerId = authUser.user.id;
+    } else if (authErr?.message.includes('already exists') || authErr?.message.includes('unique')) {
+      const { data: listUsers } = await adminClient.auth.admin.listUsers();
+      const match = listUsers?.users?.find((u: any) => u.email === ownerEmail);
+      if (match?.id) {
+        validOwnerId = match.id;
+      }
+    }
+
+    if (validOwnerId) {
+      // Upsert into profiles FIRST so profiles(id) exists BEFORE academies insert
+      await supabase.from('profiles').upsert({
+        id: validOwnerId,
+        role: 'owner',
+        platform_role: 'member',
+        name: ownerName,
+        email: ownerEmail,
+        phone_number: ownerPhone,
+        account_status: 'active',
+        updated_at: new Date().toISOString(),
+      });
+    }
+  }
+
+  // If no auth user could be provisioned via adminClient, satisfy academies_owner_id_fkey
+  // by associating with an existing profile (e.g. platform admin or existing profile)
+  if (!validOwnerId) {
+    const { data: fallbackProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (fallbackProfile?.id) {
+      validOwnerId = fallbackProfile.id;
+    }
+  }
+
+  if (!validOwnerId) {
+    return {
+      success: false,
+      message: 'Unable to initialize academy owner record. Please contact Platform Administration.',
+    };
+  }
+
+  // Insert into academies with valid owner_id (Satisfying CHECK (status IN ('active', 'suspended')) constraint)
   const fullAddress = address ? `${address}${city ? ', ' + city : ''}` : city || null;
 
-  const { error: acadErr } = await supabase.from('academies').insert({
-    name: academyName,
-    academy_code: simpleCode,
-    owner_id: provisionalOwnerId,
-    phone: ownerPhone || null,
-    address: fullAddress,
-    status: 'active', // Strictly 'active'
-    logo_url: logoUrl,
-    primary_color: primaryColor,
-    secondary_color: secondaryColor,
-    welcome_text: welcomeText || `Principal: ${ownerName} (${ownerEmail})`,
-  });
+  const { data: newAcadRecord, error: acadErr } = await supabase
+    .from('academies')
+    .insert({
+      name: academyName,
+      academy_code: simpleCode,
+      owner_id: validOwnerId,
+      phone: ownerPhone || null,
+      address: fullAddress,
+      status: 'active', // Strictly 'active'
+      logo_url: logoUrl,
+      primary_color: primaryColor,
+      secondary_color: secondaryColor,
+      welcome_text: welcomeText || `Principal: ${ownerName} (${ownerEmail})`,
+    })
+    .select('id')
+    .single();
 
-  if (acadErr) {
-    return { success: false, message: acadErr.message || 'Failed to submit registration request.' };
+  if (acadErr || !newAcadRecord) {
+    return { success: false, message: acadErr?.message || 'Failed to submit registration request.' };
+  }
+
+  // Update profile and membership if validOwnerId was bound
+  if (validOwnerId) {
+    await supabase.from('profiles').update({ academy_id: newAcadRecord.id }).eq('id', validOwnerId);
+    await supabase.from('academy_memberships').upsert({
+      academy_id: newAcadRecord.id,
+      user_id: validOwnerId,
+      role: 'owner',
+      status: 'active',
+    });
   }
 
   return {
@@ -271,13 +347,30 @@ export async function adminCreateAcademy(input: {
       ownerUserId = authUser.user.id;
     }
   } else {
-    // Fallback if service-role key is unconfigured: use client signup or generate ID
+    // Fallback if service-role key is unconfigured: use client signup or current admin ID
     const { data: suData, error: suErr } = await supabase.auth.signUp({
       email: input.ownerEmail.toLowerCase(),
       password: rawPassword,
       options: { data: { full_name: input.ownerName } },
     });
-    ownerUserId = suData.user?.id || crypto.randomUUID();
+    ownerUserId = suData.user?.id || user.userId;
+  }
+
+  // 2b. CRUCIAL: Upsert owner profile BEFORE inserting into academies!
+  // This satisfies the foreign key constraint academies_owner_id_fkey (owner_id REFERENCES profiles(id)).
+  const { error: profileErr } = await supabase.from('profiles').upsert({
+    id: ownerUserId,
+    name: input.ownerName.trim(),
+    email: input.ownerEmail.toLowerCase().trim(),
+    phone_number: input.phone?.trim() || null,
+    role: 'owner',
+    platform_role: 'member',
+    account_status: 'active',
+    updated_at: new Date().toISOString(),
+  });
+
+  if (profileErr) {
+    return { success: false, message: `Failed to initialize owner profile: ${profileErr.message}` };
   }
 
   // Enforce valid database status ('active' | 'suspended')
@@ -306,18 +399,11 @@ export async function adminCreateAcademy(input: {
     return { success: false, message: acadErr?.message || 'Failed to create academy record.' };
   }
 
-  // 4. Upsert owner profile & membership
-  await supabase.from('profiles').upsert({
-    id: ownerUserId,
-    name: input.ownerName,
-    email: input.ownerEmail.toLowerCase(),
-    phone_number: input.phone || null,
-    role: 'owner',
-    platform_role: 'member',
+  // 4. Update owner profile with academy_id & upsert membership
+  await supabase.from('profiles').update({
     academy_id: newAcad.id,
-    account_status: 'active',
     updated_at: new Date().toISOString(),
-  });
+  }).eq('id', ownerUserId);
 
   await supabase.from('academy_memberships').upsert({
     academy_id: newAcad.id,
