@@ -31,6 +31,8 @@ export default async function OwnerStudentsPage() {
     .eq('status', 'active')
     .order('name', { ascending: true });
 
+  const isAcademyOwner = user.role === 'owner' && user.academyId === academyId;
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <DashboardHeader
@@ -44,17 +46,17 @@ export default async function OwnerStudentsPage() {
         <div className="mb-6">
           <Link
             href="/owner"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 mb-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-primary hover:underline mb-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Academy Dashboard
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-blue-700" />
-            Student Enrollment & Roster Management
+            <Users className="w-6 h-6 text-brand-primary" />
+            Student Enrollment &amp; Roster Management
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Enroll students, view CNIC matches, manage portal access, and archive or re-enroll profiles.
+            Enroll students, edit profiles, filter by class, and archive or permanently delete records.
           </p>
         </div>
 
@@ -62,6 +64,7 @@ export default async function OwnerStudentsPage() {
           academyId={academyId}
           students={students || []}
           batches={batches || []}
+          canPermanentDelete={isAcademyOwner}
         />
       </main>
     </div>

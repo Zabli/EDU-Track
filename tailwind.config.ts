@@ -10,8 +10,8 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          primary: 'var(--brand-primary, #533afd)',
-          secondary: 'var(--brand-secondary, #0d253d)',
+          primary: 'var(--brand-primary, #1d4ed8)',
+          secondary: 'var(--brand-secondary, #00838F)',
           accent: 'var(--brand-accent, #ea2261)',
           dark: '#1c1e54',
           light: '#f6f9fc',

@@ -40,13 +40,13 @@ export default async function OwnerBrandingPage() {
         <div className="mb-6">
           <Link
             href="/owner"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 mb-2"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-primary hover:underline mb-2"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Academy Dashboard
           </Link>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <Palette className="w-6 h-6 text-blue-700" />
+            <Palette className="w-6 h-6 text-brand-primary" />
             White-Label Academy Branding
           </h1>
           <p className="mt-1 text-sm text-slate-600">

@@ -87,7 +87,7 @@ export default async function OwnerDashboard() {
           </Link>
           <Link
             href="/owner/teachers"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-normal text-white bg-stripe-primary hover:bg-stripe-primary-deep active:bg-stripe-primary-press shadow-stripe-1 transition-all min-h-[40px]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-normal text-white bg-brand-primary hover:bg-brand-primary-hover shadow-stripe-1 transition-all min-h-[40px]"
           >
             <GraduationCap className="w-3.5 h-3.5" />
             <span>Invite Teachers</span>
@@ -99,13 +99,13 @@ export default async function OwnerDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <Link
           href="/owner/students"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
               Active Students
             </span>
-            <div className="w-10 h-10 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-brand-primary-soft text-brand-primary flex items-center justify-center group-hover:scale-105 transition-transform">
               <Users className="w-5 h-5" />
             </div>
           </div>
@@ -114,19 +114,19 @@ export default async function OwnerDashboard() {
           </div>
           <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
             <span>Enrolled across all batches</span>
-            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ArrowRight className="w-3 h-3 text-brand-primary opacity-0 group-hover:opacity-100 transition-opacity" />
           </p>
         </Link>
 
         <Link
           href="/owner/teachers"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-emerald-300 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-secondary-soft transition-all block group"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
               Active Faculty
             </span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-brand-secondary-soft text-brand-secondary flex items-center justify-center group-hover:scale-105 transition-transform">
               <GraduationCap className="w-5 h-5" />
             </div>
           </div>
@@ -135,7 +135,7 @@ export default async function OwnerDashboard() {
           </div>
           <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
             <span>Faculty members on record</span>
-            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ArrowRight className="w-3 h-3 text-brand-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
           </p>
         </Link>
 
@@ -158,7 +158,7 @@ export default async function OwnerDashboard() {
           </div>
           <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
             <span>Requires Principal review</span>
-            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ArrowRight className="w-3 h-3 text-brand-primary opacity-0 group-hover:opacity-100 transition-opacity" />
           </p>
         </Link>
 
@@ -181,7 +181,7 @@ export default async function OwnerDashboard() {
           </div>
           <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
             <span>Teacher requests awaiting decision</span>
-            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+            <ArrowRight className="w-3 h-3 text-brand-primary opacity-0 group-hover:opacity-100 transition-opacity" />
           </p>
         </Link>
       </div>
@@ -195,14 +195,14 @@ export default async function OwnerDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <Link
           href="/owner/classes"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
-          <div className="w-11 h-11 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-xl bg-brand-primary-soft text-brand-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <BookOpen className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Classes & Sections</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Configure grade levels, batches, schedules, and teacher assignments.
@@ -211,14 +211,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/students"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <Users className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Student Roster</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Enroll students, assign batches, manage CNIC matching, and archive profiles.
@@ -227,14 +227,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/branding"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <Palette className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>White-Label Branding</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Customize academy logo, primary brand colors, and contact info.
@@ -243,14 +243,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/leave"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <CalendarCheck2 className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Student Leave Approvals</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Review leave applications and automatically sync approved dates to attendance registers.
@@ -259,14 +259,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/tests"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
-          <div className="w-11 h-11 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-xl bg-brand-primary-soft text-brand-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <FileSpreadsheet className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Tests & Examinations</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Supervise class tests, grading sheets, score entry, and results publication across the academy.
@@ -275,14 +275,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/fees"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="w-11 h-11 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <CreditCard className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Tuition Fees & Payments</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Audit external payment proofs (JazzCash / Easypaisa), generate monthly billing, and reconcile ledgers.
@@ -291,14 +291,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/reports"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-secondary-soft transition-all block group"
         >
-          <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+          <div className="w-11 h-11 rounded-xl bg-brand-secondary-soft text-brand-secondary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <BarChart3 className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Reports & Analytics</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Inspect student attendance rates, average test scores, fee recovery, and faculty workloads.
@@ -307,14 +307,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/teachers/attendance"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <Clock className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Teacher Workload & Attendance</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Track faculty daily attendance statuses and monitor scheduled vs completed lecture deliveries.
@@ -323,14 +323,14 @@ export default async function OwnerDashboard() {
 
         <Link
           href="/owner/teachers/payments"
-          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-brand-primary-soft transition-all block group"
         >
           <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
             <DollarSign className="w-5 h-5" />
           </div>
-          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-brand-primary transition-colors flex items-center justify-between">
             <span>Faculty Compensation</span>
-            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-brand-primary group-hover:translate-x-0.5 transition-all" />
           </h3>
           <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
             Private payroll and stipend disbursements. Strictly owner-only with zero faculty access.

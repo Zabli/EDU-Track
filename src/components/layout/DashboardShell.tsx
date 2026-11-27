@@ -102,6 +102,8 @@ export function DashboardShell({
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  const isAdmin = role === 'platform_admin';
+
   const getRoleBadge = () => {
     switch (role) {
       case 'platform_admin':
@@ -113,21 +115,21 @@ export function DashboardShell({
         );
       case 'owner':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-stripe-primary-tint text-stripe-primary-deep">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-brand-primary-soft text-brand-primary border border-brand-primary-soft">
             <Building2 className="w-3.5 h-3.5" />
             Academy Principal
           </span>
         );
       case 'teacher':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-brand-secondary-soft text-brand-secondary border border-brand-secondary-soft">
             <CalendarCheck2 className="w-3.5 h-3.5" />
             Teacher
           </span>
         );
       case 'student':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-stripe-ruby">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-brand-primary-soft text-brand-primary border border-brand-primary-soft">
             <Users className="w-3.5 h-3.5" />
             Student
           </span>
@@ -142,7 +144,10 @@ export function DashboardShell({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-stripe-dark-900 text-white">
+    <div className={`flex flex-col h-full text-white ${isAdmin ? 'bg-stripe-dark-900' : 'bg-brand-sidebar'}`}>
+      {/* Top Accent Bar */}
+      {!isAdmin && <div className="h-1 w-full bg-brand-primary shrink-0" />}
+
       {/* Brand Block */}
       <div className="h-16 px-5 flex items-center justify-between border-b border-white/10 shrink-0">
         <Link href={navItems[0]?.href || '/'} className="flex items-center gap-3 min-w-0">
@@ -154,14 +159,21 @@ export function DashboardShell({
               className="w-9 h-9 rounded-xl object-contain bg-white p-0.5 shrink-0"
             />
           ) : (
-            <div className="w-9 h-9 rounded-xl bg-stripe-primary flex items-center justify-center text-white shadow-stripe-1 shrink-0">
+            <div
+              className={`w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-stripe-1 shrink-0 ${
+                isAdmin ? 'bg-stripe-primary' : 'bg-brand-primary'
+              }`}
+            >
               <GraduationCap className="w-5 h-5" />
             </div>
           )}
           <div className="min-w-0">
             <div className="font-semibold text-sm tracking-tight text-white truncate">EduTrack</div>
             {academyName && (
-              <div className="text-[11px] text-stripe-primary-subdued truncate">{academyName}</div>
+              <div className="flex items-center gap-1.5 text-[11px] text-white/80 truncate">
+                {!isAdmin && <span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />}
+                <span className="truncate">{academyName}</span>
+              </div>
             )}
           </div>
         </Link>
@@ -178,7 +190,7 @@ export function DashboardShell({
 
       {/* Navigation List */}
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-1">
-        <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-slate-400">
+        <div className="px-3 pb-2 text-[10px] font-medium uppercase tracking-wider text-white/50">
           Workspace Navigation
         </div>
         {navItems.map((item) => {
@@ -191,11 +203,11 @@ export function DashboardShell({
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                 active
-                  ? 'bg-stripe-primary text-white font-medium shadow-stripe-1'
-                  : 'text-slate-300 hover:text-white hover:bg-white/10 font-light'
+                  ? `${isAdmin ? 'bg-stripe-primary' : 'bg-brand-primary'} text-white font-medium shadow-stripe-1`
+                  : 'text-white/75 hover:text-white hover:bg-white/10 font-light'
               }`}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-slate-400'}`} />
+              <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-white/60'}`} />
               <span className="truncate">{item.label}</span>
             </Link>
           );
@@ -203,14 +215,24 @@ export function DashboardShell({
       </nav>
 
       {/* Bottom User & Sign Out */}
-      <div className="p-4 border-t border-white/10 bg-[#141640] shrink-0 space-y-3">
+      <div
+        className={`p-4 border-t border-white/10 shrink-0 space-y-3 ${
+          isAdmin ? 'bg-[#141640]' : 'bg-brand-sidebar-footer'
+        }`}
+      >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-stripe-primary/30 border border-stripe-primary/50 text-stripe-primary-subdued flex items-center justify-center text-xs font-semibold shrink-0">
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+              isAdmin
+                ? 'bg-stripe-primary/30 border border-stripe-primary/50 text-stripe-primary-subdued'
+                : 'bg-brand-primary border border-white/25 text-white'
+            }`}
+          >
             {userName?.charAt(0)?.toUpperCase() || 'U'}
           </div>
           <div className="min-w-0">
             <div className="text-sm font-medium text-white truncate">{userName}</div>
-            <div className="text-[11px] text-slate-400 capitalize truncate">
+            <div className="text-[11px] text-white/65 capitalize truncate">
               {role.replace('_', ' ')}
             </div>
           </div>
@@ -252,7 +274,11 @@ export function DashboardShell({
       {/* Main Content Wrapper */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         {/* Top Utility Bar */}
-        <header className="sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-stripe-hairline px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 print:hidden">
+        <header
+          className={`sticky top-0 z-20 h-16 bg-white/95 backdrop-blur-md border-b border-stripe-hairline px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 print:hidden ${
+            !isAdmin ? 'border-t-2 border-t-brand-primary' : ''
+          }`}
+        >
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
@@ -266,8 +292,9 @@ export function DashboardShell({
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="lg:hidden font-semibold text-stripe-ink">EduTrack</span>
               {academyName && (
-                <span className="hidden sm:inline-flex items-center text-sm font-normal text-stripe-ink-secondary truncate">
-                  {academyName}
+                <span className="hidden sm:inline-flex items-center gap-2 text-sm font-medium text-stripe-ink truncate">
+                  {!isAdmin && <span className="w-2 h-2 rounded-full bg-brand-secondary shrink-0" />}
+                  <span className="truncate">{academyName}</span>
                 </span>
               )}
               {getRoleBadge()}
@@ -281,7 +308,9 @@ export function DashboardShell({
             <form action={logoutAction} className="hidden sm:block">
               <button
                 type="submit"
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-stripe-hairline text-xs font-normal text-stripe-ink-secondary hover:bg-stripe-canvas-soft hover:text-stripe-ink transition-colors shadow-stripe-1"
+                className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-stripe-hairline text-xs font-normal text-stripe-ink-secondary hover:bg-stripe-canvas-soft transition-colors shadow-stripe-1 ${
+                  !isAdmin ? 'hover:border-brand-primary-soft hover:text-brand-primary' : 'hover:text-stripe-ink'
+                }`}
               >
                 <LogOut className="w-3.5 h-3.5 text-stripe-ink-mute" />
                 <span>Sign Out</span>

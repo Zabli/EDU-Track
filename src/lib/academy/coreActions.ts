@@ -88,7 +88,10 @@ export async function enrollStudent(formData: FormData): Promise<CoreActionResul
     return { success: false, message: 'Unauthorized: Owner access required.' };
   }
 
-  const academyId = formData.get('academyId')?.toString() || user.academyId!;
+  const academyId =
+    user.platformRole === 'platform_admin'
+      ? formData.get('academyId')?.toString() || user.academyId!
+      : user.academyId!;
   assertAcademyAccess(user, academyId);
 
   const name = formData.get('name')?.toString().trim();
@@ -100,8 +103,11 @@ export async function enrollStudent(formData: FormData): Promise<CoreActionResul
   const address = formData.get('address')?.toString().trim() || null;
   const batchId = formData.get('batchId')?.toString().trim() || null;
 
-  if (!name || !className) {
-    return { success: false, message: 'Student full name and class/grade are required.' };
+  if (!name || !className || !parentName || !parentPhone) {
+    return {
+      success: false,
+      message: 'Student Full Name, Grade/Class, Guardian Name, and Guardian Phone are all required.',
+    };
   }
 
   const supabase = createClient();
@@ -188,6 +194,129 @@ export async function toggleStudentStatus(
   return {
     success: true,
     message: `Student "${student.name}" status updated to ${targetStatus}.`,
+  };
+}
+
+/**
+ * Update an enrolled student's profile details.
+ */
+export async function updateStudent(formData: FormData): Promise<CoreActionResult> {
+  const user = await getAuthenticatedUser();
+  if (!user || (!user.academyId && user.platformRole !== 'platform_admin')) {
+    return { success: false, message: 'Unauthorized: Owner access required.' };
+  }
+
+  const studentId = formData.get('studentId')?.toString().trim();
+  const name = formData.get('name')?.toString().trim();
+  const className = formData.get('className')?.toString().trim();
+  const cnic = formData.get('cnic')?.toString().trim().replace(/[^0-9]/g, '') || null;
+  const email = formData.get('email')?.toString().trim().toLowerCase() || null;
+  const parentName = formData.get('parentName')?.toString().trim() || null;
+  const parentPhone = formData.get('parentPhone')?.toString().trim() || null;
+
+  if (!studentId) {
+    return { success: false, message: 'Student ID is required.' };
+  }
+
+  if (!name || !className || !parentName || !parentPhone) {
+    return {
+      success: false,
+      message: 'Student Full Name, Grade/Class, Guardian Name, and Guardian Phone are all required.',
+    };
+  }
+
+  const supabase = createClient();
+  const { data: existing } = await supabase
+    .from('students')
+    .select('id, academy_id')
+    .eq('id', studentId)
+    .single();
+
+  if (!existing) {
+    return { success: false, message: 'Student record not found.' };
+  }
+
+  assertAcademyAccess(user, existing.academy_id);
+
+  const { data: updated, error } = await supabase
+    .from('students')
+    .update({
+      name,
+      class_name: className,
+      cnic,
+      email,
+      parent_name: parentName,
+      parent_phone: parentPhone,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', studentId)
+    .select('*')
+    .single();
+
+  if (error || !updated) {
+    return { success: false, message: error?.message || 'Failed to update student record.' };
+  }
+
+  revalidatePath('/owner');
+  revalidatePath('/owner/students');
+
+  return {
+    success: true,
+    message: `Student "${name}" updated successfully.`,
+    data: updated,
+  };
+}
+
+/**
+ * Permanently delete a student and all associated records.
+ * Strictly restricted to the Academy Owner of the student's own academy.
+ */
+export async function deleteStudentPermanently(studentId: string): Promise<CoreActionResult> {
+  const user = await getAuthenticatedUser();
+  if (!user || user.role !== 'owner' || !user.academyId || user.accountStatus !== 'active') {
+    return {
+      success: false,
+      message: 'Unauthorized: Only the active academy owner can permanently delete students.',
+    };
+  }
+
+  const supabase = createClient();
+  const { data: student } = await supabase
+    .from('students')
+    .select('id, academy_id, name')
+    .eq('id', studentId)
+    .single();
+
+  if (!student) {
+    return { success: false, message: 'Student record not found.' };
+  }
+
+  if (student.academy_id !== user.academyId) {
+    return {
+      success: false,
+      message: 'Cross-academy access denied. You can only delete students in your own academy.',
+    };
+  }
+
+  assertAcademyAccess(user, student.academy_id);
+
+  const { error } = await supabase
+    .from('students')
+    .delete()
+    .eq('id', studentId)
+    .eq('academy_id', user.academyId);
+
+  if (error) {
+    return { success: false, message: `Failed to delete student: ${error.message}` };
+  }
+
+  revalidatePath('/owner');
+  revalidatePath('/owner/students');
+  revalidatePath('/owner/classes');
+
+  return {
+    success: true,
+    message: `Student "${student.name}" was permanently deleted.`,
   };
 }
 

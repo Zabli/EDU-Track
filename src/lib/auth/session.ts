@@ -9,6 +9,8 @@ export interface UserSessionData {
   academyId: string | null;
   academyName?: string | null;
   academyLogoUrl?: string | null;
+  academyPrimaryColor?: string | null;
+  academySecondaryColor?: string | null;
   accountStatus: 'active' | 'suspended';
   redirectPath: string;
 }
@@ -79,18 +81,22 @@ export async function getAuthenticatedUser(): Promise<UserSessionData | null> {
     redirectPath = '/';
   }
 
-  // Fetch academy name and logo_url if academy_id is present
+  // Fetch academy name, logo_url, and branding colors if academy_id is present
   let academyName = null;
   let academyLogoUrl = null;
+  let academyPrimaryColor = null;
+  let academySecondaryColor = null;
   if (profile.academy_id) {
     const { data: academy } = await supabase
       .from('academies')
-      .select('name, logo_url')
+      .select('name, logo_url, primary_color, secondary_color')
       .eq('id', profile.academy_id)
       .single();
     if (academy) {
       academyName = academy.name;
       academyLogoUrl = academy.logo_url;
+      academyPrimaryColor = academy.primary_color;
+      academySecondaryColor = academy.secondary_color;
     }
   }
 
@@ -103,6 +109,8 @@ export async function getAuthenticatedUser(): Promise<UserSessionData | null> {
     academyId: profile.academy_id,
     academyName,
     academyLogoUrl,
+    academyPrimaryColor,
+    academySecondaryColor,
     accountStatus: profile.account_status,
     redirectPath,
   };

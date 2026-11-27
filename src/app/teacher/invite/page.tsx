@@ -14,6 +14,8 @@ import {
   ArrowRight,
   ShieldCheck,
   BookOpen,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { acceptTeacherInvitation } from '@/lib/onboarding/actions';
 
@@ -23,6 +25,7 @@ function TeacherInviteForm() {
   const token = searchParams.get('token');
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -110,12 +113,20 @@ function TeacherInviteForm() {
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 minLength={8}
                 placeholder="••••••••"
-                className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm"
+                className="block w-full pl-10 pr-10 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
             <p className="mt-1 text-xs text-slate-500">Minimum 8 characters.</p>
           </div>

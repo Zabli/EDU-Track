@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --brand-primary: #533afd;
-  --brand-secondary: #0d253d;
+  --brand-primary: #1d4ed8;
+  --brand-secondary: #00838F;
   --brand-accent: #ea2261;
   --foreground-rgb: 13, 37, 61;
   --background-rgb: 246, 249, 252;
@@ -25,6 +25,54 @@ body {
   .outline-hidden {
     outline: 2px solid transparent;
     outline-offset: 2px;
+  }
+
+  .bg-brand-primary-soft {
+    background-color: color-mix(in srgb, var(--brand-primary) 12%, white);
+  }
+
+  .bg-brand-primary-subtle {
+    background-color: color-mix(in srgb, var(--brand-primary) 6%, white);
+  }
+
+  .hover\:bg-brand-primary-hover:hover {
+    background-color: color-mix(in srgb, var(--brand-primary) 86%, black);
+  }
+
+  .hover\:bg-brand-primary-soft:hover {
+    background-color: color-mix(in srgb, var(--brand-primary) 12%, white);
+  }
+
+  .border-brand-primary-soft {
+    border-color: color-mix(in srgb, var(--brand-primary) 30%, white);
+  }
+
+  .hover\:border-brand-primary-soft:hover {
+    border-color: color-mix(in srgb, var(--brand-primary) 45%, white);
+  }
+
+  .bg-brand-secondary-soft {
+    background-color: color-mix(in srgb, var(--brand-secondary) 12%, white);
+  }
+
+  .hover\:bg-brand-secondary-hover:hover {
+    background-color: color-mix(in srgb, var(--brand-secondary) 86%, black);
+  }
+
+  .hover\:bg-brand-secondary-soft:hover {
+    background-color: color-mix(in srgb, var(--brand-secondary) 12%, white);
+  }
+
+  .border-brand-secondary-soft {
+    border-color: color-mix(in srgb, var(--brand-secondary) 30%, white);
+  }
+
+  .bg-brand-sidebar {
+    background-color: color-mix(in srgb, var(--brand-secondary) 55%, #0b1120);
+  }
+
+  .bg-brand-sidebar-footer {
+    background-color: color-mix(in srgb, var(--brand-secondary) 42%, #060a14);
   }
 }
 

@@ -111,7 +111,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-blue-700 hover:bg-blue-800 shadow-2xs transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-brand-primary hover:bg-brand-primary-hover shadow-2xs transition-colors"
         >
           <Plus className="w-4 h-4" />
           Create New Batch
@@ -128,7 +128,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
+            className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-brand-primary bg-brand-primary-soft hover:bg-brand-primary hover:text-white transition-colors"
           >
             <Plus className="w-4 h-4" />
             Create First Batch
@@ -143,7 +143,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-blue-100 text-blue-800">
+                  <span className="px-2.5 py-0.5 rounded-full text-2xs font-semibold bg-brand-primary-soft text-brand-primary border border-brand-primary-soft">
                     {b.class_name}
                   </span>
                   <span className="text-2xs font-semibold text-slate-500 flex items-center gap-1">
@@ -154,7 +154,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
 
                 <h3 className="text-base font-bold text-slate-900">{b.name}</h3>
                 <div className="mt-1 text-xs font-medium text-slate-700 flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                  <BookOpen className="w-3.5 h-3.5 text-brand-secondary" />
                   Subject: {b.subject}
                 </div>
 
@@ -185,7 +185,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-lg w-full p-6 animate-scale-in">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FolderPlus className="w-5 h-5 text-blue-700" />
+                <FolderPlus className="w-5 h-5 text-brand-primary" />
                 Add New Class Batch / Section
               </h3>
               <button
@@ -206,7 +206,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
                   type="text"
                   required
                   placeholder="e.g. Matric 10-A (Morning Session)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary focus:outline-none"
                 />
               </div>
 
@@ -220,7 +220,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
                     type="text"
                     required
                     placeholder="e.g. Class 10 / Matric"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary focus:outline-none"
                   />
                 </div>
 
@@ -233,7 +233,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
                     type="text"
                     required
                     placeholder="e.g. Physics"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary focus:outline-none"
                   />
                 </div>
               </div>
@@ -244,7 +244,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
                 </label>
                 <select
                   name="teacherId"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary focus:outline-none bg-white"
                 >
                   <option value="">None (Principal Managed)</option>
                   {teachers.map((t) => (
@@ -263,7 +263,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
                   name="schedule"
                   type="text"
                   placeholder="e.g. Mon-Thu, 4:00 PM - 5:30 PM"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary focus:outline-none"
                 />
               </div>
 
@@ -278,7 +278,7 @@ export function BatchManager({ academyId, batches: initialBatches, teachers }: P
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-blue-700 hover:bg-blue-800 shadow-2xs transition-colors disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-brand-primary hover:bg-brand-primary-hover shadow-2xs transition-colors disabled:opacity-50"
                 >
                   {loading ? 'Creating...' : 'Create Batch'}
                 </button>

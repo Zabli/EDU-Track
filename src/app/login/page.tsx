@@ -15,6 +15,8 @@ import {
   Building2,
   CalendarCheck2,
   Users,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { loginAction } from '@/lib/auth/actions';
 
@@ -22,6 +24,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const notice = searchParams.get('notice');
@@ -134,12 +137,20 @@ function LoginForm() {
             <input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               autoComplete="current-password"
               required
               placeholder="••••••••"
-              className="block w-full pl-10 pr-3 py-2.5 min-h-[42px] border border-stripe-hairline-input rounded-md text-stripe-ink placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-stripe-primary focus:border-stripe-primary text-sm transition-shadow"
+              className="block w-full pl-10 pr-10 py-2.5 min-h-[42px] border border-stripe-hairline-input rounded-md text-stripe-ink placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-stripe-primary focus:border-stripe-primary text-sm transition-shadow"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-stripe-ink-mute hover:text-stripe-ink transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
         </div>
 

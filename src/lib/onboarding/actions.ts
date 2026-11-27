@@ -13,6 +13,226 @@ export interface OnboardingResult {
   inviteUrl?: string;
   token?: string;
   redirectUrl?: string;
+  tempPassword?: string;
+  teacher?: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    subject: string | null;
+  };
+}
+
+/**
+ * Principal action: Directly add a teacher to the owner's own academy,
+ * create their login account with a random one-time temporary password,
+ * and require a password change on first login.
+ */
+export async function createTeacherAccount(formData: FormData): Promise<OnboardingResult> {
+  const user = await getAuthenticatedUser();
+  if (!user || (!user.academyId && user.platformRole !== 'platform_admin')) {
+    return { success: false, message: 'Unauthorized: Owner access required.' };
+  }
+
+  // Strictly bind teacher to the owner's own academy
+  const academyId =
+    user.platformRole === 'platform_admin'
+      ? formData.get('academyId')?.toString() || user.academyId
+      : user.academyId;
+
+  if (!academyId) {
+    return { success: false, message: 'Academy ID is required.' };
+  }
+
+  assertAcademyAccess(user, academyId);
+
+  const teacherName = formData.get('teacherName')?.toString().trim();
+  const phone = formData.get('phone')?.toString().trim();
+  const email = formData.get('email')?.toString().trim().toLowerCase();
+  const subject = formData.get('subject')?.toString().trim() || null;
+
+  if (!teacherName || !phone || !email) {
+    return { success: false, message: 'Teacher Name, Phone, and Email are required.' };
+  }
+
+  let adminClient: ReturnType<typeof createAdminClient>;
+  try {
+    adminClient = createAdminClient();
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err?.message || 'Admin service key is missing. Please check server configuration.',
+    };
+  }
+
+  const supabase = createClient();
+
+  // Ensure email is not already registered on another account or academy
+  const { data: existingProfile } = await adminClient
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existingProfile) {
+    return {
+      success: false,
+      message: 'An account with this email address already exists.',
+    };
+  }
+
+  // Generate random one-time temporary password (12 chars with uppercase, lowercase, digits, symbol)
+  const randomPart = crypto.randomBytes(4).toString('hex').toUpperCase();
+  const tempPassword = `Tch@${randomPart}!`;
+
+  const { data: createdAuth, error: createAuthErr } = await adminClient.auth.admin.createUser({
+    email,
+    password: tempPassword,
+    email_confirm: true,
+    user_metadata: {
+      full_name: teacherName,
+      must_change_password: true,
+      subject,
+    },
+  });
+
+  if (createAuthErr || !createdAuth.user) {
+    const msg = createAuthErr?.message || 'Failed to create teacher login.';
+    if (msg.toLowerCase().includes('already') || msg.toLowerCase().includes('exists')) {
+      return { success: false, message: 'An account with this email address already exists.' };
+    }
+    return { success: false, message: msg };
+  }
+
+  const teacherUserId = createdAuth.user.id;
+
+  // Create teacher profile strictly tied to this owner's academy
+  const { error: profileErr } = await adminClient.from('profiles').upsert({
+    id: teacherUserId,
+    name: teacherName,
+    email,
+    phone_number: phone,
+    role: 'teacher',
+    platform_role: 'member',
+    academy_id: academyId,
+    account_status: 'active',
+    must_change_password: true,
+    subject,
+    updated_at: new Date().toISOString(),
+  });
+
+  if (profileErr) {
+    // Clean up auth user so no orphan login remains
+    await adminClient.auth.admin.deleteUser(teacherUserId);
+    return { success: false, message: profileErr.message };
+  }
+
+  // Record membership for this academy (try with extended columns, fallback to core columns)
+  const { error: memErr } = await adminClient.from('academy_memberships').upsert({
+    academy_id: academyId,
+    user_id: teacherUserId,
+    role: 'teacher',
+    status: 'active',
+    invitation_status: 'active',
+    phone,
+  });
+
+  if (memErr) {
+    await adminClient.from('academy_memberships').upsert({
+      academy_id: academyId,
+      user_id: teacherUserId,
+      role: 'teacher',
+      status: 'active',
+    });
+  }
+
+  // Keep user-scoped client reference for cache consistency if needed
+  void supabase;
+
+  revalidatePath('/owner');
+  revalidatePath('/owner/teachers');
+
+  return {
+    success: true,
+    message: `Teacher "${teacherName}" added! Share their one-time temporary password safely.`,
+    tempPassword,
+    teacher: {
+      id: teacherUserId,
+      name: teacherName,
+      email,
+      phone,
+      subject,
+    },
+  };
+}
+
+/**
+ * Teacher action: Complete mandatory first-login password change before entering dashboard.
+ */
+export async function completeTeacherFirstPasswordChange(
+  formData: FormData
+): Promise<OnboardingResult> {
+  const newPassword = formData.get('password')?.toString() || '';
+  const confirmPassword = formData.get('confirmPassword')?.toString() || '';
+
+  if (newPassword.length < 8) {
+    return { success: false, message: 'Password must be at least 8 characters long.' };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { success: false, message: 'Passwords do not match.' };
+  }
+
+  const supabase = createClient();
+  const {
+    data: { user: authUser },
+    error: authErr,
+  } = await supabase.auth.getUser();
+
+  if (authErr || !authUser) {
+    return { success: false, message: 'Session expired. Please sign in again.' };
+  }
+
+  const { error: updateAuthErr } = await supabase.auth.updateUser({
+    password: newPassword,
+    data: {
+      ...(authUser.user_metadata || {}),
+      must_change_password: false,
+    },
+  });
+
+  if (updateAuthErr) {
+    return { success: false, message: updateAuthErr.message };
+  }
+
+  // Clear must_change_password flag on profiles
+  try {
+    const adminClient = createAdminClient();
+    await adminClient
+      .from('profiles')
+      .update({
+        must_change_password: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', authUser.id);
+  } catch {
+    await supabase
+      .from('profiles')
+      .update({
+        must_change_password: false,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', authUser.id);
+  }
+
+  revalidatePath('/teacher', 'layout');
+  revalidatePath('/teacher');
+
+  return {
+    success: true,
+    message: 'Password updated successfully! Loading your teacher dashboard...',
+    redirectUrl: '/teacher',
+  };
 }
 
 /**
