@@ -615,46 +615,116 @@ export async function approveAcademyRequest(requestId: string): Promise<AcademyA
 
   const supabase = createClient();
 
-  // Check if requestId is in academies table (fallback) or academy_registration_requests
-  const { data: acadMatch } = await supabase
-    .from('academies')
-    .select('id, name')
-    .eq('id', requestId)
-    .maybeSingle();
-
-  if (acadMatch) {
-    await supabase.from('academies').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', requestId);
-    revalidatePath('/admin');
-    revalidatePath('/admin/academies');
-    return { success: true, message: `Academy "${acadMatch.name}" approved and activated.` };
-  }
-
-  // Otherwise check academy_registration_requests table
   try {
-    const { data: request } = await supabase
+    // Check if requestId is in academies table (fallback) or academy_registration_requests
+    const { data: acadMatch, error: acadMatchErr } = await supabase
+      .from('academies')
+      .select('id, name, academy_code, owner_id')
+      .eq('id', requestId)
+      .maybeSingle();
+
+    if (acadMatchErr) {
+      return { success: false, message: acadMatchErr.message };
+    }
+
+    if (acadMatch) {
+      const { error: updateErr } = await supabase
+        .from('academies')
+        .update({ status: 'active', updated_at: new Date().toISOString() })
+        .eq('id', requestId);
+
+      if (updateErr) {
+        return { success: false, message: updateErr.message };
+      }
+
+      // Generate a fresh temporary password if owner account exists and service role is available
+      let tempCredentials: { email: string; password: string } | undefined;
+      if (acadMatch.owner_id) {
+        try {
+          const adminClient = createAdminClient();
+          const { data: ownerProfile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', acadMatch.owner_id)
+            .maybeSingle();
+
+          if (ownerProfile?.email) {
+            const tempPassword = `EduTrack@${Math.floor(100000 + Math.random() * 900000)}`;
+            const { error: pwErr } = await adminClient.auth.admin.updateUserById(acadMatch.owner_id, {
+              password: tempPassword,
+            });
+            if (!pwErr) {
+              tempCredentials = { email: ownerProfile.email, password: tempPassword };
+            }
+          }
+        } catch {
+          // Service role key optional in fallback path
+        }
+      }
+
+      revalidatePath('/admin');
+      revalidatePath('/admin/academies');
+      return {
+        success: true,
+        message: `Academy "${acadMatch.name}" approved and activated.`,
+        academyCode: acadMatch.academy_code,
+        credentials: tempCredentials,
+      };
+    }
+
+    // Otherwise check academy_registration_requests table
+    const { data: request, error: reqErr } = await supabase
       .from('academy_registration_requests')
       .select('*')
       .eq('id', requestId)
       .maybeSingle();
 
+    if (reqErr) {
+      return { success: false, message: reqErr.message };
+    }
+
     if (request) {
-      let code = generateSimpleAcademyCode(request.academy_name);
-      return await adminCreateAcademy({
+      const code = generateSimpleAcademyCode(request.academy_name);
+      const tempPassword = `EduTrack@${Math.floor(100000 + Math.random() * 900000)}`;
+
+      const createRes = await adminCreateAcademy({
         name: request.academy_name,
         academyCode: code,
         ownerName: request.owner_name,
         ownerEmail: request.owner_email,
+        ownerPassword: tempPassword,
         phone: request.owner_phone,
         city: request.city || undefined,
         address: request.address || undefined,
         status: 'active',
       });
-    }
-  } catch {
-    // Ignore error
-  }
 
-  return { success: false, message: 'Application request not found.' };
+      if (!createRes.success) {
+        return createRes;
+      }
+
+      await supabase
+        .from('academy_registration_requests')
+        .update({
+          status: 'approved',
+          reviewed_by: user.userId,
+          reviewed_at: new Date().toISOString(),
+        })
+        .eq('id', requestId);
+
+      revalidatePath('/admin');
+      revalidatePath('/admin/academies');
+
+      return createRes;
+    }
+
+    return { success: false, message: 'Application request not found.' };
+  } catch (err: any) {
+    return {
+      success: false,
+      message: err?.message || 'Approval failed due to an unexpected error.',
+    };
+  }
 }
 
 /**

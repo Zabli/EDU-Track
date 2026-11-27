@@ -23,6 +23,8 @@ import {
   MapPin,
   RefreshCw,
   X,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import {
   adminCreateAcademy,
@@ -97,7 +99,11 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
     academyCode: string;
     email: string;
     password?: string;
+    source?: 'approved' | 'created';
   } | null>(null);
+  const [copiedPassword, setCopiedPassword] = useState(false);
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   // Filtered lists
   const query = searchQuery.trim().toLowerCase();
@@ -126,6 +132,8 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
     setLoadingId(requestId);
     setFeedback(null);
 
+    const targetRequest = requests.find((r) => r.id === requestId);
+
     try {
       const res = await approveAcademyRequest(requestId);
       if (res.success) {
@@ -133,11 +141,23 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
         setRequests((prev) =>
           prev.map((r) => (r.id === requestId ? { ...r, status: 'approved' } : r))
         );
+        if (res.credentials?.password) {
+          setCopiedPassword(false);
+          setCopiedText(null);
+          setCreatedCredentials({
+            academyName: targetRequest?.academy_name || 'Approved Academy',
+            academyCode: res.academyCode || '',
+            email: res.credentials.email,
+            password: res.credentials.password,
+            source: 'approved',
+          });
+        }
       } else {
-        setFeedback({ type: 'error', message: res.message });
+        setFeedback({ type: 'error', message: res.message || 'Approval failed.' });
       }
-    } catch {
-      setFeedback({ type: 'error', message: 'An unexpected error occurred.' });
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setFeedback({ type: 'error', message: errMsg || 'An unexpected error occurred.' });
     } finally {
       setLoadingId(null);
     }
@@ -227,11 +247,14 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
         setShowCreateModal(false);
         setCreateLogoUrl(null);
         if (res.credentials && res.academyCode) {
+          setCopiedPassword(false);
+          setCopiedText(null);
           setCreatedCredentials({
             academyName: name,
             academyCode: res.academyCode,
             email: res.credentials.email,
             password: res.credentials.password,
+            source: 'created',
           });
         }
         // Optimistic refresh
@@ -945,14 +968,24 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Initial Password *
                   </label>
-                  <input
-                    name="ownerPassword"
-                    type="text"
-                    defaultValue="Admin@12345"
-                    required
-                    minLength={8}
-                    className="w-full px-3 py-2 font-mono border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden"
-                  />
+                  <div className="relative">
+                    <input
+                      name="ownerPassword"
+                      type={showCreatePassword ? 'text' : 'password'}
+                      defaultValue="Admin@12345"
+                      required
+                      minLength={8}
+                      className="w-full px-3 py-2 pr-10 font-mono border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatePassword((v) => !v)}
+                      aria-label={showCreatePassword ? 'Hide password' : 'Show password'}
+                      className="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600"
+                    >
+                      {showCreatePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   <span className="text-2xs text-slate-400 mt-0.5 block">Default: Admin@12345</span>
                 </div>
 
@@ -1040,34 +1073,69 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
         </div>
       )}
 
-      {/* MODAL 2: Credentials Share Dialog (Shown after new academy creation) */}
+      {/* MODAL 2: Credentials & Temporary Password Dialog (Shown after approval or creation) */}
       {createdCredentials && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 text-center">
             <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">Academy Created &amp; Activated!</h3>
+            <h3 className="text-lg font-bold text-slate-900">
+              {createdCredentials.source === 'approved'
+                ? 'Academy Approved & Activated!'
+                : 'Academy Created & Activated!'}
+            </h3>
             <p className="text-xs text-slate-500 mt-1">
-              Share these credentials with the academy owner or principal.
+              Share these sign-in details with the academy owner or principal.
             </p>
 
-            <div className="mt-5 p-4 bg-slate-50 rounded-xl border border-slate-200 text-left font-mono text-xs space-y-2">
+            {/* Clear Temporary Password Box with Copy Button & One-Time Safety Note */}
+            <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-left">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="text-2xs font-bold uppercase tracking-wider text-amber-800 block">
+                    Owner Temporary Password
+                  </span>
+                  <div className="mt-1 font-mono text-base font-bold text-slate-900 select-all break-all">
+                    {createdCredentials.password || 'Admin@12345'}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const pwd = createdCredentials.password || 'Admin@12345';
+                    navigator.clipboard.writeText(pwd);
+                    setCopiedPassword(true);
+                    setTimeout(() => setCopiedPassword(false), 2500);
+                  }}
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition-colors"
+                >
+                  {copiedPassword ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedPassword ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <p className="mt-2.5 text-[11px] leading-relaxed font-medium text-amber-900 flex items-start gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-700" />
+                <span>
+                  This temporary password is shown only once. Please copy and share it safely with the academy owner.
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 text-left font-mono text-xs space-y-2">
               <div>
                 <span className="text-slate-400 font-sans block text-2xs uppercase">Academy Name</span>
                 <span className="font-bold text-slate-900">{createdCredentials.academyName}</span>
               </div>
-              <div>
-                <span className="text-slate-400 font-sans block text-2xs uppercase">Simple Academy Code</span>
-                <span className="font-bold text-blue-700 text-sm tracking-wider">{createdCredentials.academyCode}</span>
-              </div>
+              {createdCredentials.academyCode && (
+                <div>
+                  <span className="text-slate-400 font-sans block text-2xs uppercase">Simple Academy Code</span>
+                  <span className="font-bold text-blue-700 text-sm tracking-wider">{createdCredentials.academyCode}</span>
+                </div>
+              )}
               <div>
                 <span className="text-slate-400 font-sans block text-2xs uppercase">Login Email</span>
                 <span className="text-slate-800">{createdCredentials.email}</span>
-              </div>
-              <div>
-                <span className="text-slate-400 font-sans block text-2xs uppercase">Password</span>
-                <span className="text-slate-800">{createdCredentials.password || 'Admin@12345'}</span>
               </div>
               <div>
                 <span className="text-slate-400 font-sans block text-2xs uppercase">Sign In URL</span>
@@ -1077,17 +1145,19 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
 
             <div className="mt-5 flex items-center justify-center gap-3">
               <button
+                type="button"
                 onClick={() => {
-                  const payload = `Academy: ${createdCredentials.academyName}\nCode: ${createdCredentials.academyCode}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password || 'Admin@12345'}\nLogin URL: /login`;
+                  const payload = `Academy: ${createdCredentials.academyName}\nCode: ${createdCredentials.academyCode}\nEmail: ${createdCredentials.email}\nTemporary Password: ${createdCredentials.password || 'Admin@12345'}\nLogin URL: /login`;
                   copyToClipboard(payload);
                 }}
                 className="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 text-white hover:bg-slate-900 flex items-center gap-1.5 transition-colors"
               >
                 {copiedText ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                {copiedText ? 'Copied!' : 'Copy Credentials'}
+                {copiedText ? 'All Copied!' : 'Copy All Credentials'}
               </button>
 
               <button
+                type="button"
                 onClick={() => setCreatedCredentials(null)}
                 className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
               >
@@ -1311,13 +1381,23 @@ export function AcademyManager({ initialRequests, initialAcademies }: Props) {
                 <div className="relative">
                   <input
                     name="newPassword"
-                    type="text"
+                    type={showResetPassword ? 'text' : 'password'}
                     required
                     minLength={8}
                     defaultValue="EduAdmin@2026"
-                    className="w-full px-3 py-2 font-mono border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-hidden pr-20"
+                    className="w-full px-3 py-2 font-mono border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:outline-none pr-28"
                   />
-                  <span className="absolute right-2 top-2 text-2xs text-slate-400">Min 8 chars</span>
+                  <div className="absolute inset-y-0 right-2 flex items-center gap-2">
+                    <span className="text-2xs text-slate-400 pointer-events-none">Min 8 chars</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPassword((v) => !v)}
+                      aria-label={showResetPassword ? 'Hide password' : 'Show password'}
+                      className="p-1 text-slate-400 hover:text-slate-600"
+                    >
+                      {showResetPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-1 text-2xs text-slate-500">
                   Password changes immediately in Supabase Auth. The user can log in right away with this new password.
