@@ -31,3 +31,6 @@ pnpm-debug.log*
 Thumbs.db
 *.swp
 *.bak
+
+# Agents
+.agents/

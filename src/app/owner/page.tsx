@@ -1,7 +1,7 @@
 import { getAuthenticatedUser } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { DashboardHeader } from '@/components/layout/DashboardHeader';
+import { DashboardShell } from '@/components/layout/DashboardShell';
 import {
   Users,
   GraduationCap,
@@ -17,7 +17,8 @@ import {
   FileSpreadsheet,
   BarChart3,
   DollarSign,
-  Receipt,
+  AlertCircle,
+  PlusCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -59,247 +60,283 @@ export default async function OwnerDashboard() {
     .eq('status', 'pending');
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <DashboardHeader
-        userName={user.fullName}
-        role="owner"
-        academyName={user.academyName || 'Tuition Academy'}
-        academyLogoUrl={user.academyLogoUrl}
-      />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Academy Management Dashboard
-            </h1>
-            <p className="mt-1 text-sm text-slate-600">
-              Principal operations for students, teachers, fee ledgers, attendance, and branding.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/owner/teachers"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-blue-700 hover:bg-blue-800 shadow-2xs transition-colors"
-            >
-              <GraduationCap className="w-4 h-4" />
-              Invite Teachers
-            </Link>
-          </div>
+    <DashboardShell
+      userName={user.fullName}
+      role="owner"
+      academyName={user.academyName || 'Tuition Academy'}
+      academyLogoUrl={user.academyLogoUrl}
+    >
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-light tracking-[-0.02em] text-stripe-ink">
+            Academy Management
+          </h1>
+          <p className="mt-1.5 text-sm font-light text-stripe-ink-mute">
+            Principal operations for students, teachers, fee ledgers, attendance, and branding.
+          </p>
         </div>
 
-        {/* Overview Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Active Students
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-                <Users className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">{studentCount || 0}</div>
-            <p className="mt-1 text-xs text-slate-500">Enrolled across all batches</p>
-          </div>
-
-          <Link
-            href="/owner/teachers"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Active Faculty
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                <GraduationCap className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">{teacherCount || 0}</div>
-            <p className="mt-1 text-xs text-slate-500">Faculty members on record</p>
-          </Link>
-
-          <Link
-            href="/owner/students/pending"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Pending Student Claims
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
-                <Clock className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">{pendingClaimsCount || 0}</div>
-            <p className="mt-1 text-xs text-slate-500">Requires Principal verification</p>
-          </Link>
-
-          <Link
-            href="/owner/students/removal-requests"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-rose-300 transition-colors block"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Removal Requests
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center">
-                <UserX className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">{removalRequestsCount || 0}</div>
-            <p className="mt-1 text-xs text-slate-500">Teacher requests awaiting decision →</p>
-          </Link>
-        </div>
-
-        {/* Operational Modules Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            href="/owner/classes"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-4">
-              <BookOpen className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Classes & Sections</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Configure grade levels, batches, schedules, and teacher assignments.
-            </p>
-          </Link>
-
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Link
             href="/owner/students"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-medium text-stripe-ink-secondary bg-white border border-stripe-hairline hover:bg-stripe-canvas-soft hover:border-slate-300 shadow-stripe-1 transition-all min-h-[40px]"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
-              <Users className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Student Roster</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Enroll students, assign batches, manage CNIC matching, and archive profiles.
-            </p>
+            <Users className="w-3.5 h-3.5 text-stripe-ink-mute" />
+            <span>Student Roster</span>
           </Link>
-
           <Link
-            href="/owner/branding"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
+            href="/owner/teachers"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-normal text-white bg-stripe-primary hover:bg-stripe-primary-deep active:bg-stripe-primary-press shadow-stripe-1 transition-all min-h-[40px]"
           >
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4">
-              <Palette className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>White-Label Branding</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Customize academy logo, primary brand colors, and contact info.
-            </p>
-          </Link>
-
-          <Link
-            href="/owner/leave"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
-              <CalendarCheck2 className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Student Leave Approvals</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Review leave applications and automatically sync approved dates to attendance registers.
-            </p>
-          </Link>
-
-          <Link
-            href="/owner/tests"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-4">
-              <FileSpreadsheet className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Tests & Examinations</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Supervise class tests, grading sheets, score entry, and results publication across the academy.
-            </p>
-          </Link>
-
-          <Link
-            href="/owner/fees"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4">
-              <CreditCard className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Tuition Fees & Payments</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Audit external payment proofs (JazzCash / Easypaisa), generate monthly billing, and reconcile ledgers.
-            </p>
-          </Link>
-
-          <Link
-            href="/owner/reports"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-4">
-              <BarChart3 className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Academy Reports & Analytics</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Inspect student attendance rates, average test scores, fee recovery, and faculty workloads.
-            </p>
-          </Link>
-
-          <Link
-            href="/owner/teachers/attendance"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
-              <Clock className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Teacher Workload & Attendance</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Track faculty daily attendance statuses and monitor scheduled vs completed lecture deliveries.
-            </p>
-          </Link>
-
-          <Link
-            href="/owner/teachers/payments"
-            className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center mb-4">
-              <DollarSign className="w-5 h-5" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 flex items-center justify-between">
-              <span>Faculty Compensation (Confidential)</span>
-              <ArrowRight className="w-4 h-4 text-slate-400" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-600">
-              Private payroll and stipend disbursements. Strictly owner-only with zero faculty access.
-            </p>
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Invite Teachers</span>
           </Link>
         </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Overview Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <Link
+          href="/owner/students"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Active Students
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Users className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-4xl font-light tracking-tight text-stripe-ink tabular-nums">
+            {studentCount || 0}
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Enrolled across all batches</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/teachers"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-emerald-300 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Active Faculty
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-4xl font-light tracking-tight text-stripe-ink tabular-nums">
+            {teacherCount || 0}
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Faculty members on record</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/students/pending"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-amber-300 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Pending Claims
+            </span>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform ${
+              (pendingClaimsCount || 0) > 0 ? 'bg-amber-100 text-amber-700 animate-pulse' : 'bg-amber-50 text-amber-600'
+            }`}>
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-4xl font-light tracking-tight text-stripe-ink tabular-nums">
+            {pendingClaimsCount || 0}
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Requires Principal review</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/students/removal-requests"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-rose-300 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Removal Requests
+            </span>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform ${
+              (removalRequestsCount || 0) > 0 ? 'bg-rose-100 text-rose-700' : 'bg-rose-50 text-rose-600'
+            }`}>
+              <UserX className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-4xl font-light tracking-tight text-stripe-ink tabular-nums">
+            {removalRequestsCount || 0}
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Teacher requests awaiting decision</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+      </div>
+
+      {/* Operational Modules Navigation */}
+      <div className="mb-4">
+        <h2 className="text-lg font-normal text-stripe-ink mb-1">Academy Operations & Modules</h2>
+        <p className="text-xs font-light text-stripe-ink-mute">Manage academic records, administrative ledgers, and system configurations.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <Link
+          href="/owner/classes"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Classes & Sections</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Configure grade levels, batches, schedules, and teacher assignments.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/students"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <Users className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Student Roster</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Enroll students, assign batches, manage CNIC matching, and archive profiles.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/branding"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <Palette className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>White-Label Branding</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Customize academy logo, primary brand colors, and contact info.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/leave"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <CalendarCheck2 className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Student Leave Approvals</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Review leave applications and automatically sync approved dates to attendance registers.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/tests"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <FileSpreadsheet className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Tests & Examinations</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Supervise class tests, grading sheets, score entry, and results publication across the academy.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/fees"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <CreditCard className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Tuition Fees & Payments</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Audit external payment proofs (JazzCash / Easypaisa), generate monthly billing, and reconcile ledgers.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/reports"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <BarChart3 className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Reports & Analytics</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Inspect student attendance rates, average test scores, fee recovery, and faculty workloads.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/teachers/attendance"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <Clock className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Teacher Workload & Attendance</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Track faculty daily attendance statuses and monitor scheduled vs completed lecture deliveries.
+          </p>
+        </Link>
+
+        <Link
+          href="/owner/teachers/payments"
+          className="bg-white p-6 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+            <DollarSign className="w-5 h-5" />
+          </div>
+          <h3 className="text-base font-medium text-stripe-ink group-hover:text-stripe-primary transition-colors flex items-center justify-between">
+            <span>Faculty Compensation</span>
+            <ArrowRight className="w-4 h-4 text-stripe-ink-mute group-hover:text-stripe-primary group-hover:translate-x-0.5 transition-all" />
+          </h3>
+          <p className="mt-2 text-xs font-light text-stripe-ink-mute leading-relaxed">
+            Private payroll and stipend disbursements. Strictly owner-only with zero faculty access.
+          </p>
+        </Link>
+      </div>
+    </DashboardShell>
   );
 }

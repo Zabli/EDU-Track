@@ -1,13 +1,14 @@
 import { getAuthenticatedUser } from '@/lib/auth/session';
 import { redirect } from 'next/navigation';
-import { DashboardHeader } from '@/components/layout/DashboardHeader';
+import { DashboardShell } from '@/components/layout/DashboardShell';
 import {
   CalendarCheck2,
   FileCheck2,
   CreditCard,
   FileText,
   UploadCloud,
-  GraduationCap,
+  ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -19,136 +20,187 @@ export default async function StudentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <DashboardHeader
-        userName={user.fullName}
-        role="student"
-        academyName={user.academyName || 'Tuition Academy'}
-        academyLogoUrl={user.academyLogoUrl}
-      />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+    <DashboardShell
+      userName={user.fullName}
+      role="student"
+      academyName={user.academyName || 'Tuition Academy'}
+      academyLogoUrl={user.academyLogoUrl}
+    >
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-light tracking-[-0.02em] text-stripe-ink">
             Student Academic Portal
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1.5 text-sm font-light text-stripe-ink-mute">
             Personal attendance record, test marks, fee payment proofs, and leave requests.
           </p>
         </div>
 
-        {/* Academic Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <Link
-            href="/student/attendance"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-emerald-300 transition-colors block"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Attendance Rate
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                <CalendarCheck2 className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">100%</div>
-            <p className="mt-1 text-xs text-slate-500">View detailed attendance history →</p>
-          </Link>
-
-          <Link
-            href="/student/results"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-300 transition-colors block"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Latest Test Results
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-                <FileCheck2 className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">View</div>
-            <p className="mt-1 text-xs text-slate-500">Subject marks & grades →</p>
-          </Link>
-
+        <div className="flex items-center gap-2.5 flex-wrap">
           <Link
             href="/student/fees"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-purple-300 transition-colors block"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-normal text-white bg-stripe-primary hover:bg-stripe-primary-deep active:bg-stripe-primary-press shadow-stripe-1 transition-all min-h-[40px]"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Tuition Fee Status
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
-                <CreditCard className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-xl font-bold text-slate-900">Ledger</div>
-            <p className="mt-1 text-xs text-slate-500">View invoices & pay proof →</p>
+            <UploadCloud className="w-3.5 h-3.5" />
+            <span>Submit Payment Proof</span>
           </Link>
-
           <Link
             href="/student/leave"
-            className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs hover:border-amber-300 transition-colors block"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-medium text-stripe-ink-secondary bg-white border border-stripe-hairline hover:bg-stripe-canvas-soft hover:border-slate-300 shadow-stripe-1 transition-all min-h-[40px]"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Leave Requests
-              </span>
-              <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
-                <FileText className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-3 text-2xl font-bold text-slate-900">Portal</div>
-            <p className="mt-1 text-xs text-slate-500">Apply for leave or view status →</p>
+            <FileText className="w-3.5 h-3.5 text-stripe-ink-mute" />
+            <span>Apply for Leave</span>
           </Link>
         </div>
+      </div>
 
-        {/* Student Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
+      {/* Bigger Stripe Academic Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <Link
+          href="/student/attendance"
+          className="bg-white p-6 sm:p-7 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-emerald-300 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Attendance Rate
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <CalendarCheck2 className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-4xl font-light tracking-tight text-stripe-ink tabular-nums">
+            100%
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Detailed attendance history</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+
+        <Link
+          href="/student/results"
+          className="bg-white p-6 sm:p-7 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-stripe-primary/40 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Test Results
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-stripe-primary-tint text-stripe-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+              <FileCheck2 className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-3xl font-light tracking-tight text-stripe-ink">
+            View
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Subject marks & grades</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+
+        <Link
+          href="/student/fees"
+          className="bg-white p-6 sm:p-7 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-pink-300 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Tuition Fee Status
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <CreditCard className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-3xl font-light tracking-tight text-stripe-ink">
+            Ledger
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Invoices & proof status</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+
+        <Link
+          href="/student/leave"
+          className="bg-white p-6 sm:p-7 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 hover:border-amber-300 transition-all block group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium uppercase tracking-wider text-stripe-ink-mute">
+              Leave Requests
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <FileText className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4 text-3xl font-light tracking-tight text-stripe-ink">
+            Portal
+          </div>
+          <p className="mt-2 text-xs text-stripe-ink-mute flex items-center gap-1">
+            <span>Apply or check status</span>
+            <ArrowRight className="w-3 h-3 text-stripe-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+          </p>
+        </Link>
+      </div>
+
+      {/* Student Quick Actions */}
+      <div className="mb-4">
+        <h2 className="text-lg font-normal text-stripe-ink mb-1">Student Services & Submissions</h2>
+        <p className="text-xs font-light text-stripe-ink-mute">Submit payment verification and formal leave applications directly to academy administration.</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 sm:p-7 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-11 h-11 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center">
                 <UploadCloud className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Submit Payment Proof</h3>
-                <p className="text-xs text-slate-500">JazzCash, Easypaisa, or Bank screenshot</p>
+                <h3 className="text-base font-medium text-stripe-ink">Submit Payment Proof</h3>
+                <p className="text-xs text-stripe-ink-mute">JazzCash, Easypaisa, or Bank screenshot</p>
               </div>
             </div>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
+            <p className="text-xs font-light text-stripe-ink-mute mb-6 leading-relaxed">
               Paid tuition fees externally? Submit your transaction ID and receipt screenshot for manual verification by the academy principal.
             </p>
+          </div>
+          <div>
             <Link
               href="/student/fees"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-purple-800 bg-purple-100 hover:bg-purple-200 transition"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-normal text-white bg-stripe-primary hover:bg-stripe-primary-deep active:bg-stripe-primary-press shadow-stripe-1 transition-all min-h-[40px]"
             >
-              Upload Proof & Pay →
-            </Link>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
-                <FileText className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Request Leave of Absence</h3>
-                <p className="text-xs text-slate-500">Medical or personal leave application</p>
-              </div>
-            </div>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-              Submit your absence dates and explanation in advance. Your attendance will be synchronized with Leave once approved by the Principal.
-            </p>
-            <Link
-              href="/student/leave"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200 transition"
-            >
-              Submit Leave Application →
+              <span>Upload Proof & Pay</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
-      </main>
-    </div>
+
+        <div className="bg-white p-6 sm:p-7 rounded-2xl border border-stripe-hairline shadow-stripe-1 hover:shadow-stripe-2 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3.5 mb-4">
+              <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-medium text-stripe-ink">Request Leave of Absence</h3>
+                <p className="text-xs text-stripe-ink-mute">Medical or personal leave application</p>
+              </div>
+            </div>
+            <p className="text-xs font-light text-stripe-ink-mute mb-6 leading-relaxed">
+              Submit your absence dates and explanation in advance. Your attendance will be synchronized with Leave once approved by the Principal.
+            </p>
+          </div>
+          <div>
+            <Link
+              href="/student/leave"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-medium text-stripe-ink-secondary bg-white border border-stripe-hairline hover:bg-stripe-canvas-soft hover:border-slate-300 shadow-stripe-1 transition-all min-h-[40px]"
+            >
+              <span>Submit Leave Application</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </DashboardShell>
   );
 }
